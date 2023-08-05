@@ -1,6 +1,5 @@
 import inspect
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, ValuesView
-from types import MappingProxyType
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, ValuesView, Mapping
 from functools import wraps
 from textwrap import dedent
 
@@ -115,7 +114,7 @@ class few_shot(BaseModel):
                 ) from e
 
     def _check_keyword_argument_types(
-        self, kwargs: Dict[str, Any], hints: MappingProxyType[str, inspect.Parameter]
+        self, kwargs: Dict[str, Any], hints: Mapping[str, inspect.Parameter]
     ) -> None:
         for name, value in kwargs.items():
             hint = hints.get(name)
