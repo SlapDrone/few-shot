@@ -53,7 +53,7 @@ def test_repr_formatter(formatter_repr, example):
 def test_few_shot_with_valid_data():
     @few_shot(
         examples=[
-            ((Person(name="alice", age=22, cars=[Car(model="honda", speed = 180)]),), {}, [Car(model='inim', speed=180.0)]),
+            ((Person(name="alice", age=22, cars=[Car(model="mini", speed = 180)]),), {}, [Car(model='inim', speed=180.0)]),
             ((Person(name="bob", age=53, cars=[Car(model="ford", speed=200), Car(model="renault", speed=210)]),), {}, [Car(model='drof', speed=200.0), Car(model='tluaner', speed=210.0)]),
         ],
         example_formatter=JsonFormatter()
