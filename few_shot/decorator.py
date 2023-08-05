@@ -38,7 +38,7 @@ class few_shot(BaseModel):
         arbitrary_types_allowed = True
 
     @validator("examples", pre=True)
-    def _convert_to_example(cls, examples: List[Any]) -> list[Example]:
+    def _convert_to_example(cls, examples: List[Any]) -> List[Example]:
         return [
             Example(
                 args=ex[0] if isinstance(ex[0], tuple) else (ex[0],),

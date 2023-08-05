@@ -1,4 +1,5 @@
 import inspect
+from typing import List
 from textwrap import dedent
 
 import pytest
@@ -15,7 +16,7 @@ class Car(BaseModel):
 class Person(BaseModel):
     name: str
     age: int
-    cars: list[Car]
+    cars: List[Car]
 
 
 @pytest.fixture
@@ -80,7 +81,7 @@ def test_few_shot_with_valid_data() -> None:
         ],
         example_formatter=JsonFormatter(),
     )
-    def backwards_cars(p: Person) -> list[Car]:
+    def backwards_cars(p: Person) -> List[Car]:
         """\
         Turns all your cars' names backwards every time, guaranteed!
 
@@ -106,7 +107,7 @@ def test_few_shot_with_empty_cars_list() -> None:
         ],
         example_formatter=JsonFormatter(),
     )
-    def backwards_cars(p: Person) -> list[Car]:
+    def backwards_cars(p: Person) -> List[Car]:
         """\
         Turns all your cars' names backwards every time, guaranteed!
 
@@ -158,7 +159,7 @@ def test_few_shot_with_invalid_return_type() -> None:
 
     with pytest.raises(TypeError):
 
-        def backwards_cars_bad_return_hint(p: Person) -> list[Person]:  # type: ignore
+        def backwards_cars_bad_return_hint(p: Person) -> List[Person]:  # type: ignore
             return [Car(model=c.model[::-1], speed=c.speed) for c in p.cars]  # type: ignore
 
         dec(backwards_cars_bad_return_hint)
@@ -195,7 +196,7 @@ def test_few_shot_with_invalid_argument_type() -> None:
             ],
             example_formatter=JsonFormatter(),
         )
-        def backwards_cars_invalid_arg(p: str) -> list[Car]:  # type: ignore
+        def backwards_cars_invalid_arg(p: str) -> List[Car]:  # type: ignore
             return [Car(model=c.model[::-1], speed=c.speed) for c in p.cars]  # type: ignore
 
 
