@@ -1,14 +1,13 @@
 import inspect
-import json
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, Type, ValuesView
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, ValuesView
 from types import MappingProxyType
 from functools import wraps
 from textwrap import dedent
 
-from pydantic import BaseModel, Field, parse_obj_as, validator
+from pydantic import BaseModel, parse_obj_as, validator
 
 from few_shot.example import Example
-from few_shot.formatter import FormatterProtocol, ReprFormatter, JsonFormatter
+from few_shot.formatter import FormatterProtocol, JsonFormatter
 
 
 class few_shot(BaseModel):

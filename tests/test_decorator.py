@@ -1,5 +1,4 @@
 import inspect
-import json
 from textwrap import dedent
 
 import pytest
@@ -40,7 +39,7 @@ def test_example(example: Example) -> None:
     assert example.output == "output"
 
     with pytest.raises(ValidationError):
-        Example(args="test", kwargs={}, output="output")
+        Example(args="test", kwargs={}, output="output")  # type: ignore
 
 
 def test_json_formatter(formatter_json: JsonFormatter, example: Example) -> None:
