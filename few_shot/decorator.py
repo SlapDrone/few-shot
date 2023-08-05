@@ -72,6 +72,7 @@ class few_shot(BaseModel):
             doc = dedent(doc).lstrip()  # Dedent the existing docstring and ^
             if "{examples}" in doc:
                 # Replace {examples} with actual examples
+                print(doc.format(examples=examples))
                 return doc.format(examples=examples)
             else:
                 # Append default_format and examples to existing docstring

@@ -205,18 +205,18 @@ def test_few_shot_with_different_formatting_separators():
         ],
         example_formatter=JsonFormatter(),
         join_str="\n---\n",
-        default_format="\nExample Usage:\n"
+        default_format="\nExample Usage:\n" # this should be ignored
     )
     def func_different_formatting_separators(arg: str) -> str:
-        """This function does something.
+        """
+        This function does something.
 
         {examples}"""
         return arg
 
     expected_doc = dedent("""\
     This function does something.
-
-    Example Usage:
+    
     {"arg": "test"} -> "output"
     ---
     {"arg": "test2"} -> "output2\"""").rstrip()  # remove trailing newline
