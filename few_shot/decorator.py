@@ -1,6 +1,5 @@
 import inspect
 import json
-import logging
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union, Type 
 from functools import wraps
 from textwrap import dedent
@@ -9,10 +8,6 @@ from pydantic import BaseModel, Field, parse_obj_as, validator
 
 from few_shot.example import Example
 from few_shot.formatter import FormatterProtocol, ReprFormatter, JsonFormatter
-
-
-logging.basicConfig(level="INFO")
-logger = logging.getLogger(__name__)
 
 
 class few_shot(BaseModel):
