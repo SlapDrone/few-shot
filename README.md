@@ -8,7 +8,7 @@ It has very minimal dependencies, although it was designed with use alongside LL
 
 ## Example
 
-Here's an example of using `few_shot` with marvin:
+Here's a (silly) example of using `few_shot` with marvin:
 
 ```python
 from few_shot import few_shot, JsonFormatter
