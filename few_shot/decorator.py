@@ -129,23 +129,3 @@ class few_shot(BaseModel):
         return example_strings
 
 
-
-
-# alice = Person(name="alice", age=22, cars=[Car(model="mini", speed = 180)])
-# bob = Person(name="bob", age=53, cars=[Car(model="ford", speed=200), Car(model="renault", speed=210)])
-
-# @few_shot(
-#     examples=[
-#         (alice, [Car(model='inim', speed=180.0)]),
-#         (bob, [Car(model='drof', speed=200.0), Car(model='tluaner', speed=210.0)]),
-#     ],
-#     example_formatter=ExampleFormatter(format_type="repr")
-# )
-# def backwards_cars(p: Person) -> list[Car]:
-#     """\
-#     Turns all your cars' names backwards every time, guaranteed!
-
-#     Examples:
-#     {examples}
-#     """
-#     return [Car(model=c.model[::-1], speed=c.speed) for c in p.cars]
