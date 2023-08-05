@@ -4,12 +4,12 @@ help: ## Show all Makefile targets
 
 .PHONY: format lint
 format: ## Run code formatter: black
-	black .
+	poetry run black .
 lint: ## Run linters: mypy, black, ruff
-	mypy .
-	black . --check
-	ruff check .
+	poetry run mypy .
+	poetry run black . --check
+	poetry run ruff check .
 test: ## Run tests
-	pytest tests
+	poetry run pytest tests
 # watch-docs: ## Build and watch documentation
 # 	sphinx-autobuild docs/ docs/_build/html --open-browser --watch $(GIT_ROOT)/llama_index/
