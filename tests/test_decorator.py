@@ -98,16 +98,22 @@ def test_few_shot_with_empty_cars_list() -> None:
 
 
 def test_few_shot_with_invalid_return_type() -> None:
+    dec = few_shot(
+        examples=[
+            ((Person(name="alice", age=22, cars=[Car(model="mini", speed = 180)]),), {}, [Car(model='inim', speed=180.0)]),
+            ((Person(name="bob", age=53, cars=[Car(model="ford", speed=200), Car(model="renault", speed=210)]),), {}, [Car(model='drof', speed=200.0), Car(model='tluaner', speed=210.0)]),
+        ],
+        example_formatter=JsonFormatter()
+    )
     with pytest.raises(TypeError):
-        @few_shot(
-            examples=[
-                ((Person(name="alice", age=22, cars=[Car(model="mini", speed = 180)]),), {}, [Car(model='inim', speed=180.0)]),
-                ((Person(name="bob", age=53, cars=[Car(model="ford", speed=200), Car(model="renault", speed=210)]),), {}, [Car(model='drof', speed=200.0), Car(model='tluaner', speed=210.0)]),
-            ],
-            example_formatter=JsonFormatter()
-        )
-        def backwards_cars_no_return_hint(p: Person) -> list[Car]:
+        def backwards_cars_no_return_hint(p: Person):
             return [Car(model=c.model[::-1], speed=c.speed) for c in p.cars]
+        dec(backwards_cars_no_return_hint)
+
+    with pytest.raises(TypeError):
+        def backwards_cars_bad_return_hint(p: Person) -> list[Person]: # mypy: ignore
+            return [Car(model=c.model[::-1], speed=c.speed) for c in p.cars]
+        dec(backwards_cars_bad_return_hint)
 
 def test_few_shot_with_invalid_argument_type() -> None:
     with pytest.raises(TypeError):
@@ -118,7 +124,7 @@ def test_few_shot_with_invalid_argument_type() -> None:
             ],
             example_formatter=JsonFormatter()
         )
-        def backwards_cars_invalid_arg(p: Person) -> list[Car]:
+        def backwards_cars_invalid_arg(p: str) -> list[Car]: # mypy: ignore
             return [Car(model=c.model[::-1], speed=c.speed) for c in p.cars]
 
 def test_few_shot_with_non_serializable_data() -> None:

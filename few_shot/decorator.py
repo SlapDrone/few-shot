@@ -116,18 +116,7 @@ class few_shot(BaseModel):
         try:
             parse_obj_as(hint, output)
         except Exception as e:
-            raise TypeError(f"Expected output of type {hint}, got {type(output)}") from e
-
-    def _serialize_value(self, value):
-        if isinstance(value, BaseModel):
-            return value.json()
-        elif isinstance(value, (list, tuple)):
-            return [self._serialize_value(v) for v in value]
-        elif isinstance(value, dict):
-            return {k: self._serialize_value(v) for k, v in value.items()}
-        else:
-            return value
-            
+            raise TypeError(f"Expected output of type {hint}, got {type(output)}") from e    
 
     def _generate_example_strings(self, func: Callable):
         sig = inspect.signature(func)
