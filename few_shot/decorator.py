@@ -78,7 +78,7 @@ class few_shot(BaseModel):
                 return doc + self.default_format + examples
         else:
             # Create a new docstring with default_format and examples
-            return self.default_format + examples
+            return (self.default_format + examples).lstrip()
 
     def _validate_return_type(self, func: Callable):
         sig = inspect.signature(func)
