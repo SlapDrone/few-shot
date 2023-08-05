@@ -29,7 +29,7 @@ class few_shot(BaseModel):
     """
     examples: List
     docstring_template: str = "{examples}"
-    example_formatter: FormatterProtocol = ReprFormatter()
+    example_formatter: FormatterProtocol = JsonFormatter()
     default_format: str = "\nExamples:\n"
     join_str: str = "\n"
 
@@ -67,7 +67,6 @@ class few_shot(BaseModel):
             doc = dedent(doc).lstrip()  # Dedent the existing docstring and ^
             if "{examples}" in doc:
                 # Replace {examples} with actual examples
-                print(doc.format(examples=examples))
                 return doc.format(examples=examples)
             else:
                 # Append default_format and examples to existing docstring
