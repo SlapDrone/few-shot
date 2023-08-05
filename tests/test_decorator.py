@@ -19,18 +19,18 @@ class Person(BaseModel):
 
 
 @pytest.fixture
-def example():
+def example() -> Example:
     return Example(args=("test",), kwargs={}, output="output")
 
 @pytest.fixture
-def formatter_json():
+def formatter_json() -> JsonFormatter:
     return JsonFormatter()
 
 @pytest.fixture
-def formatter_repr():
+def formatter_repr() -> ReprFormatter:
     return ReprFormatter()
 
-def test_example(example):
+def test_example(example: Example) -> None:
     assert example.args == ("test",)
     assert example.kwargs == {}
     assert example.output == "output"
@@ -38,7 +38,7 @@ def test_example(example):
     with pytest.raises(ValidationError):
         Example(args="test", kwargs={}, output="output")
 
-def test_json_formatter(formatter_json, example):
+def test_json_formatter(formatter_json: JsonFormatter, example: Example) -> None:
     # json serialises tuple as array (i.e. [])
     sig = inspect.signature(lambda test: "output")  # create a dummy function signature
     assert formatter_json.format(example, sig) == '{"test": "test"} -> "output"' 
@@ -47,10 +47,10 @@ def test_json_formatter(formatter_json, example):
         formatter_json.format(Example(args=(set(),), kwargs={}, output="output"), sig)
 
 
-def test_repr_formatter(formatter_repr, example):
+def test_repr_formatter(formatter_repr: ReprFormatter, example: Example) -> None:
     assert formatter_repr.format(example) == "('test',), {} -> 'output'"
 
-def test_few_shot_with_valid_data():
+def test_few_shot_with_valid_data() -> None:
     @few_shot(
         examples=[
             ((Person(name="alice", age=22, cars=[Car(model="mini", speed = 180)]),), {}, [Car(model='inim', speed=180.0)]),
@@ -74,7 +74,7 @@ def test_few_shot_with_valid_data():
     assert backwards_cars.__doc__ == expected_doc
 
 
-def test_few_shot_with_empty_cars_list():
+def test_few_shot_with_empty_cars_list() -> None:
     @few_shot(
         examples=[
             ((Person(name="alice", age=22, cars=[]),), {}, []),
@@ -97,7 +97,7 @@ def test_few_shot_with_empty_cars_list():
     assert backwards_cars.__doc__ == expected_doc
 
 
-def test_few_shot_with_invalid_return_type():
+def test_few_shot_with_invalid_return_type() -> None:
     with pytest.raises(TypeError):
         @few_shot(
             examples=[
@@ -106,10 +106,10 @@ def test_few_shot_with_invalid_return_type():
             ],
             example_formatter=JsonFormatter()
         )
-        def backwards_cars_no_return_hint(p: Person):
+        def backwards_cars_no_return_hint(p: Person) -> list[Car]:
             return [Car(model=c.model[::-1], speed=c.speed) for c in p.cars]
 
-def test_few_shot_with_invalid_argument_type():
+def test_few_shot_with_invalid_argument_type() -> None:
     with pytest.raises(TypeError):
         @few_shot(
             examples=[
@@ -118,10 +118,10 @@ def test_few_shot_with_invalid_argument_type():
             ],
             example_formatter=JsonFormatter()
         )
-        def backwards_cars_invalid_arg(p: str) -> list[Car]:
+        def backwards_cars_invalid_arg(p: Person) -> list[Car]:
             return [Car(model=c.model[::-1], speed=c.speed) for c in p.cars]
 
-def test_few_shot_with_non_serializable_data():
+def test_few_shot_with_non_serializable_data() -> None:
     class NonSerializable:
         pass
 
@@ -135,7 +135,7 @@ def test_few_shot_with_non_serializable_data():
         def func_non_serializable(p: NonSerializable) -> str:
             return "output"
 
-def test_few_shot_with_function_with_default_args():
+def test_few_shot_with_function_with_default_args() -> None:
     @few_shot(
         examples=[
             (("test",), {"kwarg": "value"}, "output"),
@@ -148,7 +148,7 @@ def test_few_shot_with_function_with_default_args():
 
     assert func_with_default_args("test", "value") == "test"
 
-def test_few_shot_with_function_with_variable_args():
+def test_few_shot_with_function_with_variable_args() -> None:
     @few_shot(
         examples=[
             ((1, 2, 3), {}, 6),
@@ -162,7 +162,7 @@ def test_few_shot_with_function_with_variable_args():
     assert func_with_variable_args(1, 2, 3) == 6
 
 
-def test_few_shot_with_no_docstring():
+def test_few_shot_with_no_docstring() -> None:
     @few_shot(
         examples=[
             (("test",), {}, "output"),
@@ -178,7 +178,7 @@ def test_few_shot_with_no_docstring():
     assert func_no_docstring.__doc__ == expected_doc
 
 
-def test_few_shot_with_no_examples_placeholder():
+def test_few_shot_with_no_examples_placeholder() -> None:
     @few_shot(
         examples=[
             (("test",), {}, "output"),
@@ -197,7 +197,7 @@ def test_few_shot_with_no_examples_placeholder():
 
 
 
-def test_few_shot_with_different_formatting_separators():
+def test_few_shot_with_different_formatting_separators() -> None:
     @few_shot(
         examples=[
             (("test",), {}, "output"),
@@ -216,7 +216,7 @@ def test_few_shot_with_different_formatting_separators():
 
     expected_doc = dedent("""\
     This function does something.
-    
+
     {"arg": "test"} -> "output"
     ---
     {"arg": "test2"} -> "output2\"""").rstrip()  # remove trailing newline

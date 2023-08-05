@@ -23,6 +23,23 @@ function = ["openai-function-call"]
 [tool.poetry.group.dev.dependencies]
 jupyter = "^1.0.0"
 
+[tool.mypy]
+ignore_missing_imports = "True"
+disallow_untyped_defs = "True"
+exclude = ["notebooks", "build", "examples"]
+
+[tool.ruff]
+exclude = [
+    ".venv",
+    "__pycache__",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".ruff_cache",
+    "examples",
+    "notebooks",
+]
+
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"

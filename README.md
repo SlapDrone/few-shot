@@ -66,7 +66,7 @@ generate_backwards_car_names(clara)
 
 The package is managed as a poetry project in `pyproject.toml`.
 
-To install Few_Shot, you can use pip:
+To install `few_shot`, you can use pip:
 
 ```sh
 pip install few-shot
