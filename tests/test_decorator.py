@@ -1,3 +1,4 @@
+import inspect
 import json
 from textwrap import dedent 
 
@@ -39,10 +40,12 @@ def test_example(example):
 
 def test_json_formatter(formatter_json, example):
     # json serialises tuple as array (i.e. [])
-    assert formatter_json.format(example) == '["test"], {} -> "output"' 
+    sig = inspect.signature(lambda test: "output")  # create a dummy function signature
+    assert formatter_json.format(example, sig) == '{"test": "test"} -> "output"' 
 
     with pytest.raises(TypeError):
-        formatter_json.format(Example(args=(set(),), kwargs={}, output="output"))
+        formatter_json.format(Example(args=(set(),), kwargs={}, output="output"), sig)
+
 
 def test_repr_formatter(formatter_repr, example):
     assert formatter_repr.format(example) == "('test',), {} -> 'output'"
@@ -62,14 +65,14 @@ def test_few_shot_with_valid_data():
         Examples:
         {examples}"""
         return [Car(model=c.model[::-1], speed=c.speed) for c in p.cars]
-    doc_base = dedent("""\
-    Turns all your cars' names backwards every time, guaranteed!
+    expected_doc = dedent("""\
+        Turns all your cars' names backwards every time, guaranteed!
 
-    Examples:
-    """)
-    fmt_examples = '["{\\"name\\": \\"alice\\", \\"age\\": 22, \\"cars\\": [{\\"model\\": \\"honda\\", \\"speed\\": 180.0}]}"], {} -> ["{\\"model\\": \\"inim\\", \\"speed\\": 180.0}"]\n["{\\"name\\": \\"bob\\", \\"age\\": 53, \\"cars\\": [{\\"model\\": \\"ford\\", \\"speed\\": 200.0}, {\\"model\\": \\"renault\\", \\"speed\\": 210.0}]}"], {} -> ["{\\"model\\": \\"drof\\", \\"speed\\": 200.0}", "{\\"model\\": \\"tluaner\\", \\"speed\\": 210.0}"]'
-    expected_output = doc_base + fmt_examples
-    assert backwards_cars.__doc__ == expected_output
+        Examples:
+        {"p": {"name": "alice", "age": 22, "cars": [{"model": "honda", "speed": 180.0}]}} -> [{"model": "inim", "speed": 180.0}]
+        {"p": {"name": "bob", "age": 53, "cars": [{"model": "ford", "speed": 200.0}, {"model": "renault", "speed": 210.0}]}} -> [{"model": "drof", "speed": 200.0}, {"model": "tluaner", "speed": 210.0}]""")
+    assert backwards_cars.__doc__ == expected_doc
+    #assert backwards_cars.__doc__ == expected_output
 
 def test_few_shot_with_invalid_return_type():
     with pytest.raises(TypeError):

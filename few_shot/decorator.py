@@ -49,7 +49,7 @@ class few_shot(BaseModel):
     def __call__(self, func: Callable) -> Callable:
         self._validate_return_type(func)
         self._validate_examples(func)
-        example_strings = self._generate_example_strings()
+        example_strings = self._generate_example_strings(func)
     
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -114,7 +114,9 @@ class few_shot(BaseModel):
         else:
             return value
             
-    def _generate_example_strings(self):
+
+    def _generate_example_strings(self, func: Callable):
+        sig = inspect.signature(func)
         example_strings = []
         for example in self.examples:
             if isinstance(example, Tuple):
@@ -122,7 +124,7 @@ class few_shot(BaseModel):
                     example = Example(args=example[0], output=example[1])
                 elif len(example) == 3:
                     example = Example(args=example[0], kwargs=example[1], output=example[2])
-            example_strings.append(self.example_formatter.format(example))
+            example_strings.append(self.example_formatter.format(example, sig))
 
         return example_strings
 
