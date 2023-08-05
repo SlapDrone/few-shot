@@ -1,5 +1,6 @@
 import inspect
 import json
+import logging
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union, Type 
 from functools import wraps
 from textwrap import dedent
@@ -8,6 +9,10 @@ from pydantic import BaseModel, Field, parse_obj_as, validator
 
 from few_shot.example import Example
 from few_shot.formatter import FormatterProtocol, ReprFormatter, JsonFormatter
+
+
+logging.basicConfig(level="INFO")
+logger = logging.getLogger(__name__)
 
 
 class few_shot(BaseModel):
@@ -30,6 +35,8 @@ class few_shot(BaseModel):
     examples: List
     docstring_template: str = "{examples}"
     example_formatter: FormatterProtocol = ReprFormatter()
+    default_format: str = "\nExamples:\n"
+    join_str: str = "\n"
 
     class Config:
         arbitrary_types_allowed = True
@@ -45,21 +52,33 @@ class few_shot(BaseModel):
             for ex in examples
         ]
 
-
     def __call__(self, func: Callable) -> Callable:
         self._validate_return_type(func)
         self._validate_examples(func)
         example_strings = self._generate_example_strings(func)
-    
+
         @wraps(func)
         def wrapper(*args, **kwargs):
             return func(*args, **kwargs)
-    
-        if func.__doc__:
-            wrapper.__doc__ = dedent(func.__doc__).format(examples="\n".join(example_strings))
-        else:
-            wrapper.__doc__ = self.docstring_template.format(examples="\n".join(example_strings))
+
+        if example_strings:  # Only modify docstring if there are examples
+            examples_doc = self.join_str.join(example_strings)
+            wrapper.__doc__ = self._modify_docstring(func.__doc__, examples_doc)
         return wrapper
+
+    def _modify_docstring(self, doc: Optional[str], examples: str) -> str:
+        examples = dedent(examples)
+        if doc:
+            doc = dedent(doc)  # Dedent the existing docstring
+            if "{examples}" in doc:
+                # Replace {examples} with actual examples
+                return doc.format(examples=examples)
+            else:
+                # Append default_format and examples to existing docstring
+                return doc + self.default_format + examples
+        else:
+            # Create a new docstring with default_format and examples
+            return self.default_format + examples
 
     def _validate_return_type(self, func: Callable):
         sig = inspect.signature(func)
