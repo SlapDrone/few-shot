@@ -69,7 +69,7 @@ def test_few_shot_with_valid_data():
         Turns all your cars' names backwards every time, guaranteed!
 
         Examples:
-        {"p": {"name": "alice", "age": 22, "cars": [{"model": "honda", "speed": 180.0}]}} -> [{"model": "inim", "speed": 180.0}]
+        {"p": {"name": "alice", "age": 22, "cars": [{"model": "mini", "speed": 180.0}]}} -> [{"model": "inim", "speed": 180.0}]
         {"p": {"name": "bob", "age": 53, "cars": [{"model": "ford", "speed": 200.0}, {"model": "renault", "speed": 210.0}]}} -> [{"model": "drof", "speed": 200.0}, {"model": "tluaner", "speed": 210.0}]""")
     assert backwards_cars.__doc__ == expected_doc
     #assert backwards_cars.__doc__ == expected_output
