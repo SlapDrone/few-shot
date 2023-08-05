@@ -27,7 +27,7 @@ class few_shot(BaseModel):
         TypeError: If the function being decorated does not have a specific return type hint, 
                    or if the arguments or output of an example do not match the function's signature.
     """
-    examples: List[Any]
+    examples: List
     docstring_template: str = "{examples}"
     example_formatter: FormatterProtocol = ReprFormatter()
 
@@ -36,7 +36,14 @@ class few_shot(BaseModel):
 
     @validator('examples', pre=True)
     def _convert_to_example(cls, examples):
-        return [Example(args=ex[0] if isinstance(ex[0], tuple) else (ex[0],), kwargs={}, output=ex[1]) if len(ex) == 2 else Example(*ex) for ex in examples]
+        return [
+            Example(
+                args=ex[0] if isinstance(ex[0], tuple) else (ex[0],),
+                kwargs=ex[1] if len(ex) > 2 else {},
+                output=ex[-1]
+            )
+            for ex in examples
+        ]
 
 
     def __call__(self, func: Callable) -> Callable:

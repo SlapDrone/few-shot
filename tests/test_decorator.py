@@ -1,3 +1,6 @@
+import json
+from textwrap import dedent 
+
 import pytest
 from pydantic import ValidationError, BaseModel
 from few_shot import few_shot, JsonFormatter, ReprFormatter, Example
@@ -47,15 +50,26 @@ def test_repr_formatter(formatter_repr, example):
 def test_few_shot_with_valid_data():
     @few_shot(
         examples=[
-            ((Person(name="alice", age=22, cars=[Car(model="mini", speed = 180)]),), {}, [Car(model='inim', speed=180.0)]),
+            ((Person(name="alice", age=22, cars=[Car(model="honda", speed = 180)]),), {}, [Car(model='inim', speed=180.0)]),
             ((Person(name="bob", age=53, cars=[Car(model="ford", speed=200), Car(model="renault", speed=210)]),), {}, [Car(model='drof', speed=200.0), Car(model='tluaner', speed=210.0)]),
         ],
         example_formatter=JsonFormatter()
     )
     def backwards_cars(p: Person) -> list[Car]:
-        return [Car(model=c.model[::-1], speed=c.speed) for c in p.cars]
+        """\
+        Turns all your cars' names backwards every time, guaranteed!
 
-    assert backwards_cars.__doc__ == "Examples:\n{'args': [{'name': 'alice', 'age': 22, 'cars': [{'model': 'mini', 'speed': 180.0}]}], 'kwargs': {}, 'output': [{'model': 'inim', 'speed': 180.0}]}\n{'args': [{'name': 'bob', 'age': 53, 'cars': [{'model': 'ford', 'speed': 200.0}, {'model': 'renault', 'speed': 210.0}]}], 'kwargs': {}, 'output': [{'model': 'drof', 'speed': 200.0}, {'model': 'tluaner', 'speed': 210.0}]}"
+        Examples:
+        {examples}"""
+        return [Car(model=c.model[::-1], speed=c.speed) for c in p.cars]
+    doc_base = dedent("""\
+    Turns all your cars' names backwards every time, guaranteed!
+
+    Examples:
+    """)
+    fmt_examples = '["{\\"name\\": \\"alice\\", \\"age\\": 22, \\"cars\\": [{\\"model\\": \\"honda\\", \\"speed\\": 180.0}]}"], {} -> ["{\\"model\\": \\"inim\\", \\"speed\\": 180.0}"]\n["{\\"name\\": \\"bob\\", \\"age\\": 53, \\"cars\\": [{\\"model\\": \\"ford\\", \\"speed\\": 200.0}, {\\"model\\": \\"renault\\", \\"speed\\": 210.0}]}"], {} -> ["{\\"model\\": \\"drof\\", \\"speed\\": 200.0}", "{\\"model\\": \\"tluaner\\", \\"speed\\": 210.0}"]'
+    expected_output = doc_base + fmt_examples
+    assert backwards_cars.__doc__ == expected_output
 
 def test_few_shot_with_invalid_return_type():
     with pytest.raises(TypeError):

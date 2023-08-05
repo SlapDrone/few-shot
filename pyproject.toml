@@ -9,6 +9,7 @@ packages = [{include = "few_shot"}]
 [tool.poetry.dependencies]
 python = "^3.8"
 pydantic = "^1.8.2"
+jupyter = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"
