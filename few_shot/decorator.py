@@ -37,7 +37,7 @@ class few_shot(BaseModel):
         arbitrary_types_allowed = True
 
     @validator('examples', pre=True)
-    def _convert_to_example(cls, examples: List[Tuple]) -> list[Example]:
+    def _convert_to_example(cls, examples):
         return [
             Example(
                 args=ex[0] if isinstance(ex[0], tuple) else (ex[0],),
@@ -75,12 +75,12 @@ class few_shot(BaseModel):
             # Create a new docstring with default_format and examples
             return (self.default_format + examples).lstrip()
 
-    def _validate_return_type(self, func: Callable) -> None:
+    def _validate_return_type(self, func: Callable):
         sig = inspect.signature(func)
         if sig.return_annotation is inspect.Signature.empty or sig.return_annotation is Any:
             raise TypeError("Function must have a specific return type hint")
 
-    def _validate_examples(self, func: Callable) -> None:
+    def _validate_examples(self, func: Callable):
         sig = inspect.signature(func)
         for example in self.examples:
             if isinstance(example, Tuple):
@@ -93,7 +93,7 @@ class few_shot(BaseModel):
             self._check_keyword_argument_types(example.kwargs, sig.parameters)
             self._check_output_type(example.output, sig.return_annotation)
 
-    def _check_argument_types(self, args: Tuple[Any, ...], hints: List[inspect.Parameter]) -> None:
+    def _check_argument_types(self, args: Tuple[Any, ...], hints: List[inspect.Parameter]):
         for arg, hint in zip(args, hints):
             if hint.annotation is inspect.Parameter.empty or hint.annotation is Any:
                 raise TypeError(f"Parameter '{hint.name}' must have a specific type hint")
@@ -102,7 +102,7 @@ class few_shot(BaseModel):
             except Exception as e:
                 raise TypeError(f"Expected argument of type {hint.annotation}, got {type(arg)}") from e
 
-    def _check_keyword_argument_types(self, kwargs: Dict[str, Any], hints: Dict[str, inspect.Parameter]) -> None:
+    def _check_keyword_argument_types(self, kwargs: Dict[str, Any], hints: Dict[str, inspect.Parameter]):
         for name, value in kwargs.items():
             hint = hints.get(name)
             if hint is None or hint.annotation is inspect.Parameter.empty or hint.annotation is Any:
@@ -112,26 +112,11 @@ class few_shot(BaseModel):
             except Exception as e:
                 raise TypeError(f"Expected keyword argument '{name}' of type {hint.annotation}, got {type(value)}") from e
 
-    def _check_output_type(self, output: Any, hint: Type[Any]) -> None:
+    def _check_output_type(self, output: Any, hint: Type[Any]):
         try:
             parse_obj_as(hint, output)
         except Exception as e:
-<<<<<<< HEAD
             raise TypeError(f"Expected output of type {hint}, got {type(output)}") from e    
-=======
-            raise TypeError(f"Expected output of type {hint}, got {type(output)}") from e
-
-    def _serialize_value(self, value) -> Any:
-        if isinstance(value, BaseModel):
-            return value.json()
-        elif isinstance(value, (list, tuple)):
-            return [self._serialize_value(v) for v in value]
-        elif isinstance(value, dict):
-            return {k: self._serialize_value(v) for k, v in value.items()}
-        else:
-            return value
-            
->>>>>>> retype
 
     def _generate_example_strings(self, func: Callable):
         sig = inspect.signature(func)
