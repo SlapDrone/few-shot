@@ -160,3 +160,64 @@ def test_few_shot_with_function_with_variable_args():
         return sum(args)
 
     assert func_with_variable_args(1, 2, 3) == 6
+
+
+def test_few_shot_with_no_docstring():
+    @few_shot(
+        examples=[
+            (("test",), {}, "output"),
+        ],
+        example_formatter=JsonFormatter()
+    )
+    def func_no_docstring(arg: str) -> str:
+        return arg
+
+    expected_doc = dedent("""\
+    Examples:
+    {"arg": "test"} -> "output\"""").rstrip()  # remove trailing newline
+    assert func_no_docstring.__doc__ == expected_doc
+
+
+def test_few_shot_with_no_examples_placeholder():
+    @few_shot(
+        examples=[
+            (("test",), {}, "output"),
+        ],
+        example_formatter=JsonFormatter()
+    )
+    def func_no_examples_placeholder(arg: str) -> str:
+        """This function does something."""
+        return arg
+
+    expected_doc = dedent("""\
+    This function does something.
+    Examples:
+    {"arg": "test"} -> \"output\"""").rstrip()  # remove trailing newline
+    assert func_no_examples_placeholder.__doc__ == expected_doc
+
+
+
+def test_few_shot_with_different_formatting_separators():
+    @few_shot(
+        examples=[
+            (("test",), {}, "output"),
+            (("test2",), {}, "output2"),
+        ],
+        example_formatter=JsonFormatter(),
+        join_str="\n---\n",
+        default_format="\nExample Usage:\n"
+    )
+    def func_different_formatting_separators(arg: str) -> str:
+        """This function does something.
+
+        {examples}"""
+        return arg
+
+    expected_doc = dedent("""\
+    This function does something.
+
+    Example Usage:
+    {"arg": "test"} -> "output"
+    ---
+    {"arg": "test2"} -> "output2\"""").rstrip()  # remove trailing newline
+    assert func_different_formatting_separators.__doc__ == expected_doc

@@ -67,9 +67,9 @@ class few_shot(BaseModel):
         return wrapper
 
     def _modify_docstring(self, doc: Optional[str], examples: str) -> str:
-        examples = dedent(examples)
+        examples = dedent(examples).lstrip() # remove leading whitespace
         if doc:
-            doc = dedent(doc)  # Dedent the existing docstring
+            doc = dedent(doc).lstrip()  # Dedent the existing docstring and ^
             if "{examples}" in doc:
                 # Replace {examples} with actual examples
                 return doc.format(examples=examples)
