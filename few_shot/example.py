@@ -1,4 +1,3 @@
-
 from typing import Tuple, Dict, Any
 
 from pydantic import BaseModel, Field
@@ -6,7 +5,7 @@ from pydantic import BaseModel, Field
 
 class Example(BaseModel):
     """
-    A Pydantic model representing an example for a function. 
+    A Pydantic model representing an example for a function.
 
     Attributes:
         args: A tuple representing the positional arguments that the function is called with.
@@ -16,6 +15,7 @@ class Example(BaseModel):
     Raises:
         ValidationError: If the input data cannot be parsed into the required types.
     """
+
     args: Tuple[Any, ...] = Field(...)
     kwargs: Dict[str, Any] = Field(default_factory=dict)
     output: Any = Field(...)

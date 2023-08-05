@@ -1,4 +1,3 @@
-
 import inspect
 import json
 from typing import Protocol, runtime_checkable, Optional, Any
@@ -17,15 +16,24 @@ class FormatterProtocol(Protocol):
 class JsonFormatter:
     def format(self, example: Example, sig: inspect.Signature) -> str:
         try:
-            args_dict = {name: self._serialize_value(arg) for name, arg in zip(sig.parameters.keys(), example.args)}
+            args_dict = {
+                name: self._serialize_value(arg)
+                for name, arg in zip(sig.parameters.keys(), example.args)
+            }
             if example.kwargs:  # Only include kwargs if it's not empty
-                args_dict.update({name: self._serialize_value(value) for name, value in example.kwargs.items()})
+                args_dict.update(
+                    {
+                        name: self._serialize_value(value)
+                        for name, value in example.kwargs.items()
+                    }
+                )
             args_str = json.dumps(args_dict)
             output_str = json.dumps(self._serialize_value(example.output))
         except TypeError as e:
-            raise TypeError("All arguments, keyword arguments, and outputs must be JSON serializable") from e
+            raise TypeError(
+                "All arguments, keyword arguments, and outputs must be JSON serializable"
+            ) from e
         return f"{args_str} -> {output_str}"
-
 
     def _serialize_value(self, value: Any) -> Any:
         if isinstance(value, BaseModel):
