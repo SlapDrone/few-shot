@@ -114,6 +114,22 @@ def generate_backwards_car_names(person: Person) -> list[Car]:
     """
 ```
 
+Which gives:
+
+    Given a person, return a list of their cars with the model names backwards.
+
+    Here are some examples:
+
+    Inputs:
+    {"person": {"name": "alice", "age": 22, "cars": [{"model": "mini", "speed": 180.0}]}}
+    Outputs:
+    [{"model": "inim", "speed": 180.0}]
+
+    Inputs:
+    {"person": {"name": "bob", "age": 53, "cars": [{"model": "ford", "speed": 200.0}, {"model": "renault", "speed": 210.0}]}}
+    Outputs:
+    [{"model": "drof", "speed": 200.0}, {"model": "tluaner", "speed": 210.0}]
+
 If you want to, you can implement your own `Formatter`. The only requirement is that it
 follow the `FormatterProtocol`, by exposing one method with signature:
 
