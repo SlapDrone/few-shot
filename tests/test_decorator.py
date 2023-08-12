@@ -1,10 +1,10 @@
 import inspect
-from typing import List
+from typing import List, Callable
 from textwrap import dedent
 
 import pytest
 from pydantic import ValidationError, BaseModel
-from few_shot import few_shot, JsonFormatter, ReprFormatter, Example
+from few_shot import few_shot, JsonFormatter, CleanFormatter, Example
 
 
 # simple examples
@@ -20,6 +20,14 @@ class Person(BaseModel):
 
 
 @pytest.fixture
+def dummy_fn() -> Callable:
+    def dummy(x: str, y: int = 1) -> str:
+        return "output"
+
+    return dummy
+
+
+@pytest.fixture
 def example() -> Example:
     return Example(args=("test",), kwargs={}, output="output")
 
@@ -30,8 +38,8 @@ def formatter_json() -> JsonFormatter:
 
 
 @pytest.fixture
-def formatter_repr() -> ReprFormatter:
-    return ReprFormatter()
+def formatter_clean() -> CleanFormatter:
+    return CleanFormatter()
 
 
 def test_example(example: Example) -> None:
@@ -43,17 +51,30 @@ def test_example(example: Example) -> None:
         Example(args="test", kwargs={}, output="output")  # type: ignore
 
 
-def test_json_formatter(formatter_json: JsonFormatter, example: Example) -> None:
+def test_json_formatter(
+    formatter_json: JsonFormatter, example: Example, dummy_fn: Callable
+) -> None:
     # json serialises tuple as array (i.e. [])
-    sig = inspect.signature(lambda test: "output")  # create a dummy function signature
-    assert formatter_json.format(example, sig) == '{"test": "test"} -> "output"'
+    sig = inspect.signature(dummy_fn)  # create a dummy function signature
+    assert (
+        formatter_json.format(example, sig, dummy_fn.__name__)
+        == '{"x": "test"} -> "output"'
+    )
 
     with pytest.raises(TypeError):
-        formatter_json.format(Example(args=(set(),), kwargs={}, output="output"), sig)
+        formatter_json.format(
+            Example(args=(set(),), kwargs={}, output="output"), sig, dummy_fn.__name__
+        )
 
 
-def test_repr_formatter(formatter_repr: ReprFormatter, example: Example) -> None:
-    assert formatter_repr.format(example) == "('test',), {} -> 'output'"
+def test_repr_formatter(
+    formatter_clean: CleanFormatter, example: Example, dummy_fn: Callable
+) -> None:
+    sig = inspect.signature(dummy_fn)
+    assert (
+        formatter_clean.format(example, sig, dummy_fn.__name__)
+        == "dummy(x='test', y=1) -> 'output'"
+    )
 
 
 def test_few_shot_with_valid_data() -> None:
@@ -80,6 +101,7 @@ def test_few_shot_with_valid_data() -> None:
             ),
         ],
         example_formatter=JsonFormatter(),
+        join_str="\n",
     )
     def backwards_cars(p: Person) -> List[Car]:
         """\
@@ -112,6 +134,7 @@ def test_few_shot_with_empty_cars_list() -> None:
         Turns all your cars' names backwards every time, guaranteed!
 
         Examples:
+
         {examples}"""
         return [Car(model=c.model[::-1], speed=c.speed) for c in p.cars]
 
@@ -120,6 +143,7 @@ def test_few_shot_with_empty_cars_list() -> None:
         Turns all your cars' names backwards every time, guaranteed!
 
         Examples:
+
         {"p": {"name": "alice", "age": 22, "cars": []}} -> []"""
     ).rstrip()  # remove trailing newline
     assert backwards_cars.__doc__ == expected_doc
@@ -257,6 +281,7 @@ def test_few_shot_with_no_docstring() -> None:
     expected_doc = dedent(
         """\
     Examples:
+
     {"arg": "test"} -> "output\""""
     ).rstrip()  # remove trailing newline
     assert func_no_docstring.__doc__ == expected_doc
@@ -276,7 +301,9 @@ def test_few_shot_with_no_examples_placeholder() -> None:
     expected_doc = dedent(
         """\
     This function does something.
+
     Examples:
+    
     {"arg": "test"} -> \"output\""""
     ).rstrip()  # remove trailing newline
     assert func_no_examples_placeholder.__doc__ == expected_doc

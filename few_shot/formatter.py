@@ -1,6 +1,6 @@
 import inspect
 import json
-from typing import Protocol, runtime_checkable, Optional, Any
+from typing import Protocol, runtime_checkable, Any
 
 from pydantic import BaseModel
 
@@ -9,12 +9,14 @@ from few_shot.example import Example
 
 @runtime_checkable
 class FormatterProtocol(Protocol):
-    def format(self, example: Example, sig: inspect.Signature) -> str:
+    def format(self, example: Example, sig: inspect.Signature, func_name: str) -> str:
         ...
 
 
 class JsonFormatter:
-    def format(self, example: Example, sig: inspect.Signature) -> str:
+    template = "{inputs} -> {outputs}"
+
+    def format(self, example: Example, sig: inspect.Signature, func_name: str) -> str:
         try:
             args_dict = {
                 name: self._serialize_value(arg)
@@ -33,7 +35,7 @@ class JsonFormatter:
             raise TypeError(
                 "All arguments, keyword arguments, and outputs must be JSON serializable"
             ) from e
-        return f"{args_str} -> {output_str}"
+        return self.template.format(inputs=args_str, outputs=output_str)
 
     def _serialize_value(self, value: Any) -> Any:
         if isinstance(value, BaseModel):
@@ -46,6 +48,16 @@ class JsonFormatter:
             return value
 
 
-class ReprFormatter:
-    def format(self, example: Example, sig: Optional[inspect.Signature] = None) -> str:
-        return f"{repr(example.args)}, {repr(example.kwargs)} -> {repr(example.output)}"
+class CleanFormatter:
+    template = "{name}({inputs}) -> {outputs}"
+
+    def format(self, example: Example, sig: inspect.Signature, func_name: str) -> str:
+        # Bind the arguments and keyword arguments to the signature's parameters
+        bound_args = sig.bind(*example.args, **example.kwargs)
+        bound_args.apply_defaults()
+
+        # Format the function call
+        params = ", ".join(f"{k}={repr(v)}" for k, v in bound_args.arguments.items())
+        return self.template.format(
+            name=func_name, inputs=params, outputs=repr(example.output)
+        )

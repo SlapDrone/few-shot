@@ -6,7 +6,7 @@ from textwrap import dedent
 from pydantic import BaseModel, parse_obj_as, validator
 
 from few_shot.example import Example
-from few_shot.formatter import FormatterProtocol, JsonFormatter
+from few_shot.formatter import FormatterProtocol, CleanFormatter
 
 
 class few_shot(BaseModel):
@@ -29,9 +29,9 @@ class few_shot(BaseModel):
 
     examples: List
     docstring_template: str = "{examples}"
-    example_formatter: FormatterProtocol = JsonFormatter()
-    default_format: str = "\nExamples:\n"
-    join_str: str = "\n"
+    example_formatter: FormatterProtocol = CleanFormatter()
+    default_format: str = "\n\nExamples:\n\n"
+    join_str: str = "\n\n"
 
     class Config:
         arbitrary_types_allowed = True
@@ -150,6 +150,8 @@ class few_shot(BaseModel):
                     example = Example(
                         args=example[0], kwargs=example[1], output=example[2]
                     )
-            example_strings.append(self.example_formatter.format(example, sig))
+            example_strings.append(
+                self.example_formatter.format(example, sig, func.__name__)
+            )
 
         return example_strings
