@@ -49,7 +49,7 @@ print(generate_backwards_car_names.description)
     generate_backwards_car_names(person=Person(name='bob', age=53, cars=[Car(model='ford', speed=200.0), Car(model='renault', speed=210.0)])) -> [Car(model='drof', speed=200.0), Car(model='tluaner', speed=210.0)]
 
 
-In the example above, the `generate_backwards_car_names` function is an AI function defined using Marvin's `ai_fn` decorator. The function's body is empty, as the actual implementation is provided by the AI. The `few_shot` decorator enriches the function's docstring with examples of its usage, formatted as JSON.
+In the example above, the `generate_backwards_car_names` function is an AI function defined using Marvin's `ai_fn` decorator. The function's body is empty, as the actual implementation is provided by the AI. The `few_shot` decorator enriches the function's docstring with examples of its usage.
 
 ```python
 clara = Person(name="clara", age=38, cars=[Car(model="delorean", speed=88.), Car(model="T", speed=20.)])
@@ -90,6 +90,39 @@ The main feature of Few_Shot is the `few_shot` decorator. This decorator takes a
 - `join_str`: A string used to join multiple example strings in the docstring. Default is "\n".
 - `default_format`: A string that is prepended to the examples in the docstring. Default is "\nExamples:\n".
 
+## Customisation
+
+You can tweak some parameters to change the way the examples are displayed from the default by placing the `{examples}` key yourself and playing with the decorator arguments:
+
+```python
+@marvin.ai_fn
+@few_shot(
+        examples=[
+            ((Person(name="alice", age=22, cars=[Car(model="mini", speed = 180)]),),  [Car(model='inim', speed=180.0)]),
+            ((Person(name="bob", age=53, cars=[Car(model="ford", speed=200), Car(model="renault", speed=210)]),),  [Car(model='drof', speed=200.0), Car(model='tluaner', speed=210.0)]),
+        ],
+        example_formatter=JsonFormatter(template="Inputs:\n{inputs}\nOutputs:\n{outputs}"),
+        join_str = "\n\n",    
+    )
+def generate_backwards_car_names(person: Person) -> list[Car]:
+    """
+    Given a person, return a list of their cars with the model names backwards.
+
+    Here are some examples:
+    
+    {examples}
+    """
+```
+
+If you want to, you can implement your own `Formatter`. The only requirement is that it
+follow the `FormatterProtocol`, by exposing one method with signature:
+
+```python
+class YourFormatter:
+    ...
+    def format(self, example: Example, sig: inspect.Signature, func_name: str) -> str:
+        ...
+```
 
 ## Testing
 

@@ -13,8 +13,8 @@ class FormatterProtocol(Protocol):
         ...
 
 
-class JsonFormatter:
-    template = "{inputs} -> {outputs}"
+class JsonFormatter(BaseModel):
+    template: str = "{inputs} -> {outputs}"
 
     def format(self, example: Example, sig: inspect.Signature, func_name: str) -> str:
         try:
@@ -48,8 +48,8 @@ class JsonFormatter:
             return value
 
 
-class CleanFormatter:
-    template = "{name}({inputs}) -> {outputs}"
+class CleanFormatter(BaseModel):
+    template: str = "{name}({inputs}) -> {outputs}"
 
     def format(self, example: Example, sig: inspect.Signature, func_name: str) -> str:
         # Bind the arguments and keyword arguments to the signature's parameters
