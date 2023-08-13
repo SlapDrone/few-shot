@@ -84,7 +84,7 @@ poetry add few-shot
 
 The main feature of Few_Shot is the `few_shot` decorator. This decorator takes a function and a set of examples, and generates a docstring for the function that includes these examples. The examples are validated against the function's signature and return type, ensuring that they are correct. The decorator has several optional arguments that allow you to customize how the examples are formatted and included in the docstring:
 
-- `examples`: A list of examples, where each example is a tuple containing arguments, keyword arguments, and the expected output of the function.
+- `examples`: A list of examples, where each `Example` takes keyword arguments, and the expected output of the function.
 - `example_formatter`: An instance of a class implementing the FormatterProtocol (just the `format` method, taking an `Example`). Default is `CleanFormatter()`.
 - `docstring_template`: A string template for the docstring. The string "{examples}" in the template will be replaced with the formatted examples. Default is "{examples}".
 - `join_str`: A string used to join multiple example strings in the docstring. Default is "\n".
