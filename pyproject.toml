@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "few_shot"
-version = "0.2.0"
+version = "0.3.0"
 description = "<A simple decorator for injecting few-shot examples into a function docstring, validating against its type hints.>"
 authors = ["SlapDrone <slapdrone@proton.me>"]
 license = "MIT"
