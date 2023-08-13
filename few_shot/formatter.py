@@ -19,7 +19,7 @@ class JsonFormatter(BaseModel):
     def format(self, example: Example, sig: inspect.Signature, func_name: str) -> str:
         try:
             args_dict = {}
-            if example.kwargs: 
+            if example.kwargs:
                 args_dict.update(
                     {
                         name: self._serialize_value(value)

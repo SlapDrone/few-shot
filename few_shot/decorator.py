@@ -1,9 +1,9 @@
 import inspect
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, ValuesView, Mapping
+from typing import Any, Callable, List, Optional
 from functools import wraps
 from textwrap import dedent
 
-from pydantic import BaseModel, parse_obj_as, validator
+from pydantic import BaseModel
 
 from few_shot.example import Example
 from few_shot.formatter import FormatterProtocol, CleanFormatter
