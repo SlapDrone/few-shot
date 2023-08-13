@@ -29,7 +29,7 @@ def dummy_fn() -> Callable:
 
 @pytest.fixture
 def example() -> Example:
-    return Example(args=("test",), kwargs={}, output="output")
+    return Example(x="test", y=1, output="output")
 
 
 @pytest.fixture
@@ -43,31 +43,29 @@ def formatter_clean() -> CleanFormatter:
 
 
 def test_example(example: Example) -> None:
-    assert example.args == ("test",)
-    assert example.kwargs == {}
+    assert example.kwargs == {"x": "test", "y": 1}
     assert example.output == "output"
 
     with pytest.raises(ValidationError):
-        Example(args="test", kwargs={}, output="output")  # type: ignore
+        Example(kwargs="test", output="output")  # type: ignore
 
 
 def test_json_formatter(
     formatter_json: JsonFormatter, example: Example, dummy_fn: Callable
 ) -> None:
-    # json serialises tuple as array (i.e. [])
     sig = inspect.signature(dummy_fn)  # create a dummy function signature
     assert (
         formatter_json.format(example, sig, dummy_fn.__name__)
-        == '{"x": "test"} -> "output"'
+        == '{"x": "test", "y": 1} -> "output"'
     )
 
     with pytest.raises(TypeError):
         formatter_json.format(
-            Example(args=(set(),), kwargs={}, output="output"), sig, dummy_fn.__name__
+            Example(kwargs={"x": set()}, output="output"), sig, dummy_fn.__name__
         )
 
 
-def test_repr_formatter(
+def test_clean_formatter(
     formatter_clean: CleanFormatter, example: Example, dummy_fn: Callable
 ) -> None:
     sig = inspect.signature(dummy_fn)
@@ -80,24 +78,20 @@ def test_repr_formatter(
 def test_few_shot_with_valid_data() -> None:
     @few_shot(
         examples=[
-            (
-                (Person(name="alice", age=22, cars=[Car(model="mini", speed=180)]),),
-                {},
-                [Car(model="inim", speed=180.0)],
+            Example(
+                kwargs={"p": Person(name="alice", age=22, cars=[Car(model="mini", speed=180)])},
+                output=[Car(model="inim", speed=180.0)]
             ),
-            (
-                (
-                    Person(
-                        name="bob",
-                        age=53,
-                        cars=[
-                            Car(model="ford", speed=200),
-                            Car(model="renault", speed=210),
-                        ],
-                    ),
-                ),
-                {},
-                [Car(model="drof", speed=200.0), Car(model="tluaner", speed=210.0)],
+            Example(
+                kwargs={"p": Person(
+                    name="bob",
+                    age=53,
+                    cars=[
+                        Car(model="ford", speed=200),
+                        Car(model="renault", speed=210),
+                    ],
+                )},
+                output=[Car(model="drof", speed=200.0), Car(model="tluaner", speed=210.0)]
             ),
         ],
         example_formatter=JsonFormatter(),
@@ -125,7 +119,7 @@ def test_few_shot_with_valid_data() -> None:
 def test_few_shot_with_empty_cars_list() -> None:
     @few_shot(
         examples=[
-            ((Person(name="alice", age=22, cars=[]),), {}, []),
+            Example(kwargs={"p": Person(name="alice", age=22, cars=[])}, output=[]),
         ],
         example_formatter=JsonFormatter(),
     )
@@ -152,24 +146,20 @@ def test_few_shot_with_empty_cars_list() -> None:
 def test_few_shot_with_invalid_return_type() -> None:
     dec = few_shot(
         examples=[
-            (
-                (Person(name="alice", age=22, cars=[Car(model="mini", speed=180)]),),
-                {},
-                [Car(model="inim", speed=180.0)],
+            Example(
+                kwargs={"p": Person(name="alice", age=22, cars=[Car(model="mini", speed=180)])},
+                output=[Car(model="inim", speed=180.0)],
             ),
-            (
-                (
-                    Person(
-                        name="bob",
-                        age=53,
-                        cars=[
-                            Car(model="ford", speed=200),
-                            Car(model="renault", speed=210),
-                        ],
-                    ),
-                ),
-                {},
-                [Car(model="drof", speed=200.0), Car(model="tluaner", speed=210.0)],
+            Example(
+                kwargs={"p": Person(
+                    name="bob",
+                    age=53,
+                    cars=[
+                        Car(model="ford", speed=200),
+                        Car(model="renault", speed=210),
+                    ],
+                )},
+                output=[Car(model="drof", speed=200.0), Car(model="tluaner", speed=210.0)],
             ),
         ],
         example_formatter=JsonFormatter(),
@@ -194,28 +184,20 @@ def test_few_shot_with_invalid_argument_type() -> None:
 
         @few_shot(
             examples=[
-                (
-                    (
-                        Person(
-                            name="alice", age=22, cars=[Car(model="mini", speed=180)]
-                        ),
-                    ),
-                    {},
-                    [Car(model="inim", speed=180.0)],
+                Example(
+                    kwargs={"p": Person(name="alice", age=22, cars=[Car(model="mini", speed=180)])},
+                    output=[Car(model="inim", speed=180.0)],
                 ),
-                (
-                    (
-                        Person(
-                            name="bob",
-                            age=53,
-                            cars=[
-                                Car(model="ford", speed=200),
-                                Car(model="renault", speed=210),
-                            ],
-                        ),
-                    ),
-                    {},
-                    [Car(model="drof", speed=200.0), Car(model="tluaner", speed=210.0)],
+                Example(
+                    kwargs={"p": Person(
+                        name="bob",
+                        age=53,
+                        cars=[
+                            Car(model="ford", speed=200),
+                            Car(model="renault", speed=210),
+                        ],
+                    )},
+                    output=[Car(model="drof", speed=200.0), Car(model="tluaner", speed=210.0)],
                 ),
             ],
             example_formatter=JsonFormatter(),
@@ -232,7 +214,7 @@ def test_few_shot_with_non_serializable_data() -> None:
 
         @few_shot(
             examples=[
-                ((NonSerializable(),), {}, "output"),
+                Example(kwargs={"p": NonSerializable()}, output="output"),
             ],
             example_formatter=JsonFormatter(),
         )
@@ -243,8 +225,8 @@ def test_few_shot_with_non_serializable_data() -> None:
 def test_few_shot_with_function_with_default_args() -> None:
     @few_shot(
         examples=[
-            (("test",), {"kwarg": "value"}, "output"),
-            (("test2",), {"kwarg": "value2"}, "output2"),
+            Example(kwargs={"arg": "test", "kwarg": "value"}, output="test"),
+            Example(kwargs={"arg": "test2", "kwarg": "value2"}, output="test2"),
         ],
         example_formatter=JsonFormatter(),
     )
@@ -257,8 +239,8 @@ def test_few_shot_with_function_with_default_args() -> None:
 def test_few_shot_with_function_with_variable_args() -> None:
     @few_shot(
         examples=[
-            ((1, 2, 3), {}, 6),
-            ((4, 5, 6), {}, 15),
+            Example(kwargs={"args": (1, 2, 3)}, output=6),
+            Example(kwargs={"args": (4, 5, 6)}, output=15),
         ],
         example_formatter=JsonFormatter(),
     )
@@ -271,7 +253,7 @@ def test_few_shot_with_function_with_variable_args() -> None:
 def test_few_shot_with_no_docstring() -> None:
     @few_shot(
         examples=[
-            (("test",), {}, "output"),
+            Example(kwargs={"arg": "test"}, output="output"),
         ],
         example_formatter=JsonFormatter(),
     )
@@ -290,7 +272,7 @@ def test_few_shot_with_no_docstring() -> None:
 def test_few_shot_with_no_examples_placeholder() -> None:
     @few_shot(
         examples=[
-            (("test",), {}, "output"),
+            Example(kwargs={"arg": "test"}, output="output"),
         ],
         example_formatter=JsonFormatter(),
     )
@@ -312,8 +294,8 @@ def test_few_shot_with_no_examples_placeholder() -> None:
 def test_few_shot_with_different_formatting_separators() -> None:
     @few_shot(
         examples=[
-            (("test",), {}, "output"),
-            (("test2",), {}, "output2"),
+            Example(kwargs={"arg": "test"}, output="output"),
+            Example(kwargs={"arg": "test2"}, output="output2"),
         ],
         example_formatter=JsonFormatter(),
         join_str="\n---\n",
