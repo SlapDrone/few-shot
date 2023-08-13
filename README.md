@@ -150,8 +150,8 @@ pytest
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel free to submit a PR.
 
 ## License
 
-Few_Shot is released under the MIT License.
+`few-shot` is released under the MIT License.
