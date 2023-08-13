@@ -22,6 +22,7 @@ class Example(BaseModel):
     def split_args_kwargs_output(cls, values):
         output = values.pop('output')
         kwargs = values
+        print(f"in validator: {kwargs=}")
         return {'kwargs': kwargs, 'output': output}
 
     def check(self, signature: inspect.Signature) -> None:
