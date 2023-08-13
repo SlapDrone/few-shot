@@ -11,7 +11,7 @@ It has very minimal dependencies, although it was designed with use alongside LL
 Here's a (silly) example of using `few_shot` with marvin:
 
 ```python
-from few_shot import few_shot, JsonFormatter
+from few_shot import few_shot, Example, CleanFormatter, JsonFormatter
 from pydantic import BaseModel
 import marvin
 
@@ -27,8 +27,8 @@ class Person(BaseModel):
 @marvin.ai_fn
 @few_shot(
     examples=[
-        ((Person(name="alice", age=22, cars=[Car(model="mini", speed = 180)]),),  [Car(model='inim', speed=180.0)]),
-        ((Person(name="bob", age=53, cars=[Car(model="ford", speed=200), Car(model="renault", speed=210)]),),  [Car(model='drof', speed=200.0), Car(model='tluaner', speed=210.0)]),
+        Example(person=Person(name="alice", age=22, cars=[Car(model="mini", speed = 180)]), output=[Car(model='inim', speed=180.0)]),
+        Example(person=Person(name="bob", age=53, cars=[Car(model="ford", speed=200), Car(model="renault", speed=210)]), output=[Car(model='drof', speed=200.0), Car(model='tluaner', speed=210.0)]),
     ],
     example_formatter=CleanFormatter() # or JsonFormatter
 )
@@ -97,13 +97,13 @@ You can tweak some parameters to change the way the examples are displayed from 
 ```python
 @marvin.ai_fn
 @few_shot(
-        examples=[
-            ((Person(name="alice", age=22, cars=[Car(model="mini", speed = 180)]),),  [Car(model='inim', speed=180.0)]),
-            ((Person(name="bob", age=53, cars=[Car(model="ford", speed=200), Car(model="renault", speed=210)]),),  [Car(model='drof', speed=200.0), Car(model='tluaner', speed=210.0)]),
-        ],
-        example_formatter=JsonFormatter(template="Inputs:\n{inputs}\nOutputs:\n{outputs}"),
-        join_str = "\n\n",    
-    )
+    examples=[
+        Example(person=Person(name="alice", age=22, cars=[Car(model="mini", speed = 180)]), output=[Car(model='inim', speed=180.0)]),
+        Example(person=Person(name="bob", age=53, cars=[Car(model="ford", speed=200), Car(model="renault", speed=210)]), output=[Car(model='drof', speed=200.0), Car(model='tluaner', speed=210.0)]),
+    ],
+    example_formatter=JsonFormatter(template="Inputs:\n{inputs}\nOutputs:\n{outputs}"),
+    join_str = "\n\n",      
+)
 def generate_backwards_car_names(person: Person) -> list[Car]:
     """
     Given a person, return a list of their cars with the model names backwards.
