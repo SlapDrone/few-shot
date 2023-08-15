@@ -7,9 +7,9 @@ license = "MIT"
 packages = [{include = "few_shot"}]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.8.1"
 pydantic = "^1.8.2"
-
+llama-index = { version = "^0.8", optional = true }
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"
@@ -21,6 +21,7 @@ jupyter = "^1.0.0"
 [tool.poetry.extras]
 marvin = ["marvin"]
 function = ["openai-function-call"]
+llama = ["llama-index"]
 
 [tool.poetry.group.dev.dependencies]
 jupyter = "^1.0.0"
